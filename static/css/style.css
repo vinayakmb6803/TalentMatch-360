@@ -1,0 +1,60 @@
+/* Background & card */
+body, html { height:100%; margin:0; font-family: "Segoe UI", Roboto, Arial, sans-serif; }
+.app-bg {
+  min-height:100vh;
+  background: linear-gradient(135deg, #04204a 0%, #0f4bd8 60%, #2a8cff 100%);
+  padding: 32px;
+}
+.chat-shell {
+  width: 760px;
+  max-width: 95%;
+  background: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  display:flex;
+  flex-direction:column;
+  box-shadow: 0 10px 30px rgba(2,18,50,0.35);
+}
+
+/* header */
+.chat-header {
+  display:flex; align-items:center; gap:12px;
+  padding:14px 18px; background: linear-gradient(90deg, rgba(0,0,0,0.03), rgba(255,255,255,0.01));
+}
+.logo { width:44px; height:44px; border-radius:10px; object-fit:cover; background:#fff; padding:6px; }
+
+/* title */
+.name { font-weight:700; color:#0b2b57; font-size:16px; }
+.tagline { color:#6b7280; font-size:12px; margin-top:2px; }
+
+/* chat area */
+.chat-body {
+  padding:18px; height:60vh; overflow-y:auto; background: linear-gradient(180deg, #fbfdff 0%, #f7fbff 100%);
+}
+.msg { display:flex; margin-bottom:12px; }
+.msg.bot { justify-content:flex-start; }
+.msg.user { justify-content:flex-end; }
+.bubble {
+  max-width:72%; padding:12px 14px; border-radius:14px; line-height:1.4; white-space:pre-wrap;
+  box-shadow: 0 6px 18px rgba(6,12,34,0.06);
+}
+.user-bubble { background: linear-gradient(90deg,#0b59ff,#1ea6ff); color:white; border-bottom-right-radius:6px; }
+.msg.user .bubble { background: linear-gradient(90deg,#edf2ff,#e6f0ff); color:#0b2b57; border-bottom-left-radius:6px; }
+
+/* typing */
+.typing { opacity:0.85; }
+
+/* footer forms */
+.chat-footer { padding:12px 16px; border-top:1px solid rgba(0,0,0,0.04); background: transparent; }
+.chat-footer textarea.form-control { resize:vertical; }
+.form-control, .btn { border-radius:8px; }
+
+/* send button */
+.btn-send { background: #0b59ff; color:#fff; border:none; padding:10px 12px; border-radius:8px; }
+.btn-send:hover { opacity:0.95; }
+
+/* small screens */
+@media (max-width:480px){
+  .chat-shell{ width: 100%; }
+  .logo{ width:40px;height:40px; }
+}

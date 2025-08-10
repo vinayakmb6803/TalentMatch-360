@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>TalentMatch-360</title>
+
+  <!-- Bootstrap & icons -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.13.0/css/all.css"/>
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+</head>
+<body>
+  <div class="app-bg">
+    <div class="container h-100 d-flex justify-content-center align-items-center">
+      <div class="chat-shell shadow-lg">
+        <div class="chat-header d-flex align-items-center">
+          <img src="{{ url_for('static', filename='images/robot.png') }}" class="logo" alt="robot">
+          <div class="ml-2">
+            <div class="name">TalentMatch-360</div>
+            <div class="tagline">Smart ATS Chatbot — upload resume & paste JD</div>
+          </div>
+        </div>
+
+        <div class="chat-body" id="messages"></div>
+
+        <div class="chat-footer">
+          <form id="uploadForm" enctype="multipart/form-data" class="mb-2">
+            <textarea id="jd" name="jd" class="form-control mb-2" rows="3" placeholder="Paste the Job Description here..." required></textarea>
+            <div class="d-flex align-items-center">
+              <input type="file" id="resume" name="resume" accept="application/pdf" class="mr-2" required>
+              <button class="btn btn-primary btn-sm ml-auto" type="submit">Analyze</button>
+            </div>
+          </form>
+
+          <form id="messageForm" class="d-flex align-items-center">
+            <input id="text" type="text" class="form-control" placeholder="Type a follow-up question..." autocomplete="off">
+            <button class="btn btn-send ml-2" type="submit"><i class="fas fa-paper-plane"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function esc(t){ return $('<div>').text(t).html(); }
+function appendBot(t){ $('#messages').append('<div class="msg bot"><div class="bubble">' + esc(t) + '</div></div>'); $('#messages').scrollTop($('#messages')[0].scrollHeight); }
+function appendUser(t){ $('#messages').append('<div class="msg user"><div class="bubble user-bubble">' + esc(t) + '</div></div>'); $('#messages').scrollTop($('#messages')[0].scrollHeight); }
+function showTyping(){ $('#messages').append('<div id="typing" class="msg bot"><div class="bubble typing">...</div></div>'); $('#messages').scrollTop($('#messages')[0].scrollHeight); }
+function removeTyping(){ $('#typing').remove(); }
+
+$('#uploadForm').on('submit', function(e){
+  e.preventDefault();
+  const jd = $('#jd').val().trim();
+  const file = $('#resume')[0].files[0];
+  if(!jd || !file){ alert('Please provide JD and a PDF resume.'); return; }
+
+  appendUser('Uploaded resume and job description for analysis.');
+  showTyping();
+
+  const fd = new FormData();
+  fd.append('jd', jd);
+  fd.append('resume', file);
+
+  $.ajax({
+    url: '/upload', method: 'POST', data: fd, contentType: false, processData: false,
+    success: function(resp){
+      removeTyping();
+      if(resp.error){ appendBot('⚠️ ' + resp.error); return; }
+      let delay = 600;
+      resp.messages.forEach((m, idx) => {
+        setTimeout(()=> appendBot(m), delay);
+        delay += 900 + Math.min(200*idx, 1000);
+      });
+    },
+    error: function(xhr){
+      removeTyping();
+      const err = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Upload failed';
+      appendBot('⚠️ ' + err);
+    }
+  });
+});
+
+$('#messageForm').on('submit', function(e){
+  e.preventDefault();
+  const text = $('#text').val().trim();
+  if(!text) return;
+  appendUser(text);
+  $('#text').val('');
+  showTyping();
+  $.post('/get', { msg: text })
+    .done(function(res){ removeTyping(); if(res.error) appendBot('⚠️ '+res.error); else appendBot(res.reply || 'No reply'); })
+    .fail(function(xhr){ removeTyping(); const err = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : 'Server error'; appendBot('⚠️ '+err); });
+});
+</script>
+</body>
+</html>
